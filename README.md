@@ -1,25 +1,22 @@
-Project 02 - README
-===================
+Project - README
+================
 
 Members
 -------
 
 - Domer McDomerson (dmcdomer@nd.edu)
 
-Summary
--------
+Demonstration
+-------------
 
-Latency
--------
+Link to Presentation.
 
-Throughput
-----------
+Errata
+------
 
-Analysis
---------
-
-Conclusion
-----------
+Summary of things that don't work (quite right).
 
 Contributions
 -------------
+
+Enumeration of the contributions of each group member.
