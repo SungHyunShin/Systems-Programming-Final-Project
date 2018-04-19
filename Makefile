@@ -1,5 +1,5 @@
 CC=		gcc
-CFLAGS=		-g -gdwarf-2 -Wall -std=gnu99
+CFLAGS=		-g -gdwarf-2 -Wall -Werror -std=gnu99
 LD=		gcc
 LDFLAGS=	-L.
 AR=		ar
