@@ -12,6 +12,7 @@ PROCESSES = 1
 REQUESTS  = 1
 VERBOSE   = False
 URL       = None
+ARGUMENTS = sys.argv[1:]
 
 # Functions
 
@@ -27,14 +28,30 @@ def usage(status=0):
 
 def do_request(pid):
     ''' Perform REQUESTS HTTP requests and return the average elapsed time. '''
+    
     return 0
 
 # Main execution
 
 if __name__ == '__main__':
     # Parse command line arguments
+    if not ARGUMENTS:
+        usage(0)
+        
+    while len(ARGUMENTS) and len(ARGUMENTS[0]) > 1:
+        ARG = ARGUMENTS.pop(0)
+        if ARG == '-h':
+            usage(0)
+        elif ARG == '-v':
+            VERBOSE = True
+        elif ARG == '-p':
+            PROCESSES = int(ARGUMENTS.pop(0))
+        elif ARG == '-r':
+            REQUESTS = ARGUMENTS.pop(0)
+        else:
+            URL = ARG
 
     # Create pool of workers and perform requests
-    pass
+    pool = multiprocessing.Pool(PROCESSES)
 
 # vim: set sts=4 sw=4 ts=8 expandtab ft=python:
