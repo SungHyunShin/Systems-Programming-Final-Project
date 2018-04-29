@@ -18,6 +18,7 @@
  * @param   port        Port number to bind to and listen on.
  * @return  Allocated server socket file descriptor.
  **/
+//a
 int socket_listen(const char *port) {
     /* Lookup server address information */
 
