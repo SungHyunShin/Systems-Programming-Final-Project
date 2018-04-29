@@ -4,12 +4,14 @@ Project - README
 Members
 -------
 
-- Domer McDomerson (dmcdomer@nd.edu)
+- Nicholas Marcopoli (nmarcopo@nd.edu)
+- Austin Sura        (asura@nd.edu)
+- Sung Hyun Shin     (ssin1@nd.edu)
 
 Demonstration
 -------------
 
-Link to Presentation.
+https://docs.google.com/presentation/d/1uxEwSPMoKRkB-4QWyqDZbSC5ZflS22lFqh5QLrLZA94/edit?usp=sharing
 
 Errata
 ------
