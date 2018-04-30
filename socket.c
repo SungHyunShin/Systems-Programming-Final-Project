@@ -29,7 +29,7 @@ int socket_listen(const char *port) {
     struct addrinfo *results;
     int status;
     if((status = getaddrinfo(HOST,POST,&hints,&results))!= 0){
-        fprintf(stderr, "getaddrinfo failed: %s\n", gai_strerror(status));
+        log("getaddrinfo failed: %s\n");
         return EXIT_FAILURE;
     }
 
@@ -38,20 +38,20 @@ int socket_listen(const char *port) {
     for (struct addrinfo *p = results; p != NULL && socket_fd < 0; p = p->ai_next) {
 	/* Allocate socket */
         if((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) <0) {
-            fprintf(stderr, "Unable to make socket: %s\n", strerror(errno));
+            log("Unable to make socket: %s\n");
             continue;
         }
 
 	/* Bind socket */
         if(bind(socket_fd, p->ai_addr, p->ai_addrlen) < 0){
-            fprint(stderr, "Unable to bind: %s\n", strerror(errno));
+            log("Unable to bind: %s\n");
             close(server_fd);
             return EXIT_FAILURE;
         }
         
     	/* Listen to socket */
         if(listen(socket_fd, SOMAXCONN) < 0) {
-            fprintf(stderr, "Unable to listen: %s\n", strerror(errno));
+            log("Unable to listen: %s\n");
             close(socket_fd);
             return EXIT_FAILURE;
         }

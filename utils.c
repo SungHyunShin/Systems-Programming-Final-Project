@@ -94,6 +94,9 @@ const char * http_status_string(HTTPStatus status) {
  * @return  Point to first whitespace character in s.
  **/
 char * skip_nonwhitespace(char *s) {
+    while(!isspace(*s)){
+        s++;
+    }
     return s;
 }
 
@@ -104,6 +107,9 @@ char * skip_nonwhitespace(char *s) {
  * @return  Point to first non-whitespace character in s.
  **/
 char * skip_whitespace(char *s) {
+    while(isspace(*s)){
+        s++;
+    }
     return s;
 }
 
