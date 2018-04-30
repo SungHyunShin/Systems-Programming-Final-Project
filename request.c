@@ -205,13 +205,38 @@ int parse_request_headers(Request *r) {
     char *name;
     char *value;
 
+    char *temp; // temporary char to split the buffer
+
     /* Parse headers from socket */
+    r->headers = curr;
+    while(fgets(buffer, BUFSIZ, r->file)){
+        chomp(buffer);
+        if(temp = strchr(buffer, ':') == NULL){
+            log("Not a valid header format.");
+            goto fail;
+        }
+        // split buffer at the position of the colon
+        *temp = '\0';
+        name = buffer; // get just the name
+        temp = skip_whitespace(temp + 1); // goes to space after colon
+        value = temp;
+        if(curr = calloc(1, sizeof(Header)) == NULL){
+            log("Could not allocate memory for header.");
+            goto fail;
+        }
+        // set headers in the request struct
+        curr->name = name; curr->value = value;
+        curr->next = NULL;
+        // move to the next header
+        curr = curr->next;
+    }
 
 #ifndef NDEBUG
     for (struct header *header = r->headers; header != NULL; header = header->next) {
-    	debug("HTTP HEADER %s = %s", header->name, header->value);
+        debug("HTTP HEADER %s = %s", header->name, header->value);
     }
 #endif
+
     return 0;
 
 fail:
