@@ -33,18 +33,35 @@ Request * accept_request(int sfd) {
     socklen_t rlen;
 
     /* Allocate request struct (zeroed) */
+    r = calloc(1, sizeof(Request));
+    r->headers = NULL;
 
     /* Accept a client */
+    int cfd = accept(sfd, &raddr, &rlen);
+    if(cfd < 0){
+        log("Accepting client connection failed.");
+        goto fail;
+    }
 
     /* Lookup client information */
+    if(getnameinfo(&raddr, sizeof(raddr), r->host, sizeof(r->host), r->port, sizeof(r->port), 0) != 0){
+        log("Could not look up client information.");
+        goto fail;
+    }
 
     /* Open socket stream */
+    r->file = fdopen(cfd, "w+");
+    if(!r->file){
+        log("Could not open socket stream.");
+        goto fail;
+    }
 
     log("Accepted request from %s:%s", r->host, r->port);
     return r;
 
 fail:
     /* Deallocate request struct */
+    free(r);
     return NULL;
 }
 
@@ -114,12 +131,35 @@ int parse_request_method(Request *r) {
     char *query;
 
     /* Read line from socket */
+    if(read(r->file, buffer, 0) < 0){
+        log("Could not read from socket.");
+        goto fail;
+    }
 
     /* Parse method and uri */
+    skip_whitespace(buffer);
+    if(method = strtok(buffer, ' ') == NULL){
+        log("Could not parse method.");
+        goto fail;
+    }
+    if(uri = strtok(NULL, ' ') == NULL){
+        log("Could not parse uri.");
+        goto fail;
+    }
 
     /* Parse query from uri */
+    // skip uri, go straight to query
+    if(strtok(uri, '?') == NULL){
+        debug("No Query Exists.");
+    }else if(query = strtok(NULL, '?') == NULL){
+        log("Could not parse query.");
+        goto fail;
+    }
 
     /* Record method, uri, and query in request struct */
+    r->method = method;
+    r->uri    = uri;
+    r->query  = query; // may be an issue because it might not exist.
 
     debug("HTTP METHOD: %s", r->method);
     debug("HTTP URI:    %s", r->uri);
