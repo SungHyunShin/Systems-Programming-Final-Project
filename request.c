@@ -211,6 +211,10 @@ int parse_request_headers(Request *r) {
     /* Parse headers from socket */
     r->headers = curr;
     while(fgets(buffer, BUFSIZ, r->file)){
+        if(strcmp(buffer, "\n") == 0){
+            log("Reached end of headers.");
+            break;
+        }
         chomp(buffer);
         if(temp = strchr(buffer, ':') == NULL){
             log("Not a valid header format.");
