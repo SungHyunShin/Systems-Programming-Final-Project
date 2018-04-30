@@ -129,20 +129,21 @@ int parse_request_method(Request *r) {
     char *method;
     char *uri;
     char *query;
-
+    const char* delim = " ";
     /* Read line from socket */
-    if(read(r->file, buffer, 0) < 0){
+    if(read(r->fd, buffer, 0) < 0){
         log("Could not read from socket.");
         goto fail;
     }
 
     /* Parse method and uri */
     skip_whitespace(buffer);
-    if(method = strtok(buffer, ' ') == NULL){
+
+    if(method = strtok(buffer, delim) == NULL){
         log("Could not parse method.");
         goto fail;
     }
-    if(uri = strtok(NULL, ' ') == NULL){
+    if(uri = strtok(NULL, delim) == NULL){
         log("Could not parse uri.");
         goto fail;
     }
