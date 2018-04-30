@@ -20,7 +20,7 @@ clean:
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
 
-spidey: forking.o handler.o request.o single.o socket.o spidey.o utils.o
+spidey: request.o  utils.o
 	@echo Compiling $@...
 	@$(LD) $(LDFLAGS) -o $@ $^
 
