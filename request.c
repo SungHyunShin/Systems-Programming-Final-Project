@@ -130,6 +130,7 @@ int parse_request_method(Request *r) {
     char *uri;
     char *query;
     const char* delim = " ";
+    const char* quest = "?";
     /* Read line from socket */
     if(read(r->fd, buffer, 0) < 0){
         log("Could not read from socket.");
@@ -139,21 +140,21 @@ int parse_request_method(Request *r) {
     /* Parse method and uri */
     skip_whitespace(buffer);
 
-    if(method = strtok(buffer, delim) == NULL){
+    if((method = strtok(buffer, delim)) == NULL){
         log("Could not parse method.");
         goto fail;
     }
-    if(uri = strtok(NULL, delim) == NULL){
+    if((uri = strtok(NULL, delim)) == NULL){
         log("Could not parse uri.");
         goto fail;
     }
 
     /* Parse query from uri */
     // skip uri, go straight to query
-    if(strtok(uri, '?') == NULL){
+    if((strtok(uri, quest)) == NULL){
         debug("No Query Exists.");
         query = NULL;
-    }else if(query = strtok(NULL, '?') == NULL){
+    }else if((query = strtok(NULL, quest)) == NULL){
         log("Could not parse query.");
         goto fail;
     }
@@ -211,40 +212,40 @@ int parse_request_headers(Request *r) {
     /* Parse headers from socket */
     r->headers = curr;
     while(fgets(buffer, BUFSIZ, r->file)){
-        if(strcmp(buffer, "\n") == 0){
-            log("Reached end of headers.");
-            break;
-        }
-        chomp(buffer);
-        if(temp = strchr(buffer, ':') == NULL){
-            log("Not a valid header format.");
-            goto fail;
-        }
-        // split buffer at the position of the colon
-        *temp = '\0';
-        name = buffer; // get just the name
-        temp = skip_whitespace(temp + 1); // goes to space after colon
-        value = temp;
-        if(curr = calloc(1, sizeof(Header)) == NULL){
-            log("Could not allocate memory for header.");
-            goto fail;
-        }
-        // set headers in the request struct
-        curr->name = name; curr->value = value;
-        curr->next = NULL;
-        // move to the next header
-        curr = curr->next;
+      if((strcmp(buffer, "\n")) == 0){
+	log("Reached end of headers.");
+	break;
+      }
+      chomp(buffer);
+      if((temp = strchr(buffer, ':')) == NULL){
+	log("Not a valid header format.");
+	goto fail;
+      }
+      // split buffer at the position of the colon
+      *temp = '\0';
+      name = buffer; // get just the name
+      temp = skip_whitespace(temp + 1); // goes to space after colon
+      value = temp;
+      if((curr = calloc(1, sizeof(Header))) == NULL){
+	log("Could not allocate memory for header.");
+	goto fail;
+      }
+      // set headers in the request struct
+      curr->name = name; curr->value = value;
+      curr->next = NULL;
+      // move to the next header
+      curr = curr->next;
     }
-
+    
 #ifndef NDEBUG
     for (struct header *header = r->headers; header != NULL; header = header->next) {
-        debug("HTTP HEADER %s = %s", header->name, header->value);
+      debug("HTTP HEADER %s = %s", header->name, header->value);
     }
 #endif
-
+    
     return 0;
-
-fail:
+    
+ fail:
     return -1;
 }
 
