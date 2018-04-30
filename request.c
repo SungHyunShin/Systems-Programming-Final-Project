@@ -151,6 +151,7 @@ int parse_request_method(Request *r) {
     // skip uri, go straight to query
     if(strtok(uri, '?') == NULL){
         debug("No Query Exists.");
+        query = NULL;
     }else if(query = strtok(NULL, '?') == NULL){
         log("Could not parse query.");
         goto fail;
