@@ -32,11 +32,11 @@
  * This function returns an allocated string that must be free'd.
  **/
 char * determine_mimetype(const char *path) {
-    char *ext;
-    char *mimetype;
-    char *token;
-    char buffer[BUFSIZ];
-    FILE *fs = NULL;
+  //    char *ext=NULL;
+  // char *mimetype=NULL;
+  // char *token=NULL;
+  // char buffer[BUFSIZ]=NULL;
+  // FILE *fs = NULL;
 
     /* Find file extension */
 
@@ -64,18 +64,30 @@ char * determine_mimetype(const char *path) {
  * string must later be free'd.
  **/
 char * determine_request_path(const char *uri) {
-    char *path = malloc(BUFSIZ);
-    if((path = realpath(uri)) == NULL){
+  
+  char * temp = strdup(RootPath);
+  strcat(temp,uri);
+
+
+  char * rlpath = realpath(temp,NULL);
+
+ 
+    if(rlpath == NULL){
         log("Cannot determine request path.");
-        free(path);
+        free(temp);
+	free(rlpath);
         return NULL;
     }
-    if(strncmp(path, RootPath, strlen(RootPath)) != 0){
+
+    if(strncmp(rlpath, RootPath, strlen(RootPath)) != 0){
         log("Real path does not begin with RootPath.");
-        free(path);
+        free(temp);
+	free(rlpath);
         return NULL;
     }
-    return path;
+
+    free(temp);
+    return rlpath;
 }
 
 /**
