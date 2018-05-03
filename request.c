@@ -86,6 +86,7 @@ void free_request(Request *r) {
     close(r->fd);
 
     /* Free allocated strings */
+    // TODO: THIS MAY BE WRONG
     free(r->method);
     free(r->uri);
     free(r->path);
