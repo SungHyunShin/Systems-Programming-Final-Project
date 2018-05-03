@@ -31,8 +31,17 @@ HTTPStatus  handle_request(Request *r) {
     HTTPStatus result;
 
     /* Parse request */
+    if(parse_request(r) < 0){
+        log("Could not parse request.");
+        // return an internal server error
+        return handle_error(r, HTTP_STATUS_INTERNAL_SERVER_ERROR);
+    }
 
     /* Determine request path */
+    if((r->path = determine_request_path(r->uri)) == NULL){
+        log("Could not determine request path.");
+        return handle_error(r, HTTP_STATUS_INTERNAL_SERVER_ERROR);
+    }
     debug("HTTP REQUEST PATH: %s", r->path);
 
     /* Dispatch to appropriate request handler type based on file type */

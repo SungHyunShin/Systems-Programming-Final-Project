@@ -64,7 +64,18 @@ char * determine_mimetype(const char *path) {
  * string must later be free'd.
  **/
 char * determine_request_path(const char *uri) {
-    return NULL;
+    char *path = malloc(BUFSIZ);
+    if((path = realpath(uri)) == NULL){
+        log("Cannot determine request path.");
+        free(path);
+        return NULL;
+    }
+    if(strncmp(path, RootPath, strlen(RootPath)) != 0){
+        log("Real path does not begin with RootPath.");
+        free(path);
+        return NULL;
+    }
+    return path;
 }
 
 /**
