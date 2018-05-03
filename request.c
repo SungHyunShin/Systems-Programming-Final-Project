@@ -83,12 +83,26 @@ void free_request(Request *r) {
     }
 
     /* Close socket or fd */
+    close(r->fd);
 
     /* Free allocated strings */
+    free(r->method);
+    free(r->uri);
+    free(r->path);
+    free(r->query);
 
     /* Free headers */
+    Header *curr = r->headers, *tmp;
+    while(curr->next != NULL){
+        tmp = curr;
+        curr = curr->next;
+        free(tmp);
+    }
+    free(curr);
 
     /* Free request */
+    free(r);
+
 }
 
 /**
@@ -102,8 +116,17 @@ void free_request(Request *r) {
  **/
 int parse_request(Request *r) {
     /* Parse HTTP Request Method */
+    if(parse_request_method(r) < 0){
+        log("Could not parse request headers method.");
+        return -1;
+    }
 
     /* Parse HTTP Requet Headers*/
+    if(parse_request_headers(r) < 0){
+        log("Could not parse HTTP Request Headers.");
+        return -1;
+    }
+
     return 0;
 }
 
