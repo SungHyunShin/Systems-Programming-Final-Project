@@ -66,12 +66,37 @@ HTTPStatus  handle_browse_request(Request *r) {
     int n;
 
     /* Open a directory for reading or scanning */
+    DIR *directory = opendir(r->path);
+    if(!directory){
+        log("Could not open directory: %s",r->path);
+    }
 
+    n = scandir( r->path, &entries, NULL, alphasort);
+
+    if(n == -1){
+        log("Unable to scandir on directory.");
+        closedir(directory);
+        return HTTP_STATUS_NOT_FOUND;
+    }
+    
     /* Write HTTP Header with OK Status and text/html Content-Type */
-
+    fprintf(r->file, "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n");
+    
     /* For each entry in directory, emit HTML list item */
+    fprintf(r->file, "<ul>");
+    for(int i = 0; i < n; i++){
+        fprintf(r->file,"<li>"); // list item
+        fprintf(r->file, "<a href=%s%s>", r->uri, entries[i]->d_name); // link url
+        fprintf(r->file, entries[i]->d_name); // link name
+        fprintf(r->file, "</a>"); // closing link
+        fprintf(r->file, "</li>"); // closing list item
+    }
+    fprintf(r->file, "<ul>");
 
     /* Flush socket, return OK */
+    fflush(r->file);
+    closedir(directory);
+    free(entries);
     return HTTP_STATUS_OK;
 }
 
