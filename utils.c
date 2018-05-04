@@ -32,11 +32,11 @@
  * This function returns an allocated string that must be free'd.
  **/
 char * determine_mimetype(const char *path) {
-  //    char *ext=NULL;
-  // char *mimetype=NULL;
-  // char *token=NULL;
-  // char buffer[BUFSIZ]=NULL;
-  // FILE *fs = NULL;
+    char *ext=NULL;
+    char *mimetype=NULL;
+    char *token=NULL;
+    char buffer[BUFSIZ]=NULL;
+    FILE *fs = NULL;
 
     /* Find file extension */
     // takes you to one char after the '.'
@@ -140,7 +140,7 @@ const char * http_status_string(HTTPStatus status) {
         "418 I'm A Teapot",
     };
 
-    return NULL;
+    return StatusStrings[status];
 }
 
 /**
