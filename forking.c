@@ -20,11 +20,17 @@
 int forking_server(int sfd) {
     /* Accept and handle HTTP request */
     while (true) {
-    	/* Accept request */
+        /* Accept request */
+        debug("Accepting client request.");
+        FILE *client_file = accept_request(sfd);
+        if(!client_file){
+            continue;
+        }
 
-	/* Ignore children */
+        /* Ignore children */
+        
 
-	/* Fork off child process to handle request */
+        /* Fork off child process to handle request */
     }
 
     /* Close server socket */
