@@ -104,17 +104,25 @@ HTTPStatus  handle_file_request(Request *r) {
     /* Write HTTP Headers with OK status and determined Content-Type */
     if(fprintf(r->file, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", mimetype) < 0){
         log("Cannot print to socket.");
-        return HTTP_STATUS_NOT_FOUND;
+        goto fail;
     }
 
     /* Read from file and write to socket in chunks */
-    
+    // TODO: do we add a <html> and </html> to these fwrites
+    while((nread = fread(buffer, BUFSIZ, 1, fs)) > 0){ // 1 element of size BUFSIZ
+        fwrite(buffer, nread, 1, r->file); // write to file, 1 element of size nread
+    }
 
     /* Close file, flush socket, deallocate mimetype, return OK */
+    fclose(fs);
+    fflush(r->file);
+    free(mimetype);
     return HTTP_STATUS_OK;
 
 fail:
     /* Close file, free mimetype, return INTERNAL_SERVER_ERROR */
+    fclose(fs);
+    free(mimetype);
     return HTTP_STATUS_INTERNAL_SERVER_ERROR;
 }
 
