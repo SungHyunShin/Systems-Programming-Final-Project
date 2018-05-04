@@ -196,9 +196,18 @@ HTTPStatus  handle_error(Request *r, HTTPStatus status) {
     const char *status_string = http_status_string(status);
 
     /* Write HTTP Header */
+    fprintf(r->file, "HTTP/1.0 %s\r\nContent-Type: text/html\r\n\r\n",status_string);
 
     /* Write HTML Description of Error*/
-
+    fprintf(r->file,"<h1>");
+    fprintf(r->file,"I don't feel so good...");
+    fprintf(r->file,"</h1>");
+    fprintf(r->file,"<h2>");
+    fprintf(r->file,"Something went wrong:");
+    fprintf(r->file,"</h2>");
+    fprintf(r->file,"<p>");
+    fprintf(r->file,"%s\n",status_string);
+    fprintf(r->file,"</p>");
     /* Return specified status */
     return status;
 }
