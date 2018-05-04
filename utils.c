@@ -39,6 +39,7 @@ char * determine_mimetype(const char *path) {
     FILE *fs = NULL;
 
     /* Find file extension */
+    // takes you to one char after the '.'
     if((ext = strchr(path, '.') + 1) == NULL){
         log("Cannot find file extension.");
         return DefaultMimeType;
@@ -51,19 +52,26 @@ char * determine_mimetype(const char *path) {
     }
 
     /* Scan file for matching file extensions */
-    while(fgets(buffer, BUFSIZ, fs)){
+    bool exit = false;
+    while(fgets(buffer, BUFSIZ, fs) && !exit){
         token = strtok(buffer, "\t");
+        *token = '\0';
+        token++; // get past the \0, now buffer is just the mimetype
         token = skip_whitespace(token);
 
-        while(streq(token, "\n") ==){
-            
+        while(!streq(token, "\n") == 0){
+            if(strncmp(token, ext, strlen(ext))){
+                mimetype = strdup(buffer);
+                exit = true;
+                break;
+            }
         }
 
     }
 
-
     if(mimetype == NULL){
         log("No matching mimetype found.");
+        close(fs);
         return DefaultMimeType;
     }
 
