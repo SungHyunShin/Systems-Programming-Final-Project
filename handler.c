@@ -93,8 +93,16 @@ HTTPStatus  handle_file_request(Request *r) {
     size_t nread;
 
     /* Open file for reading */
+    if((fs = fopen(r->path, "r")) == NULL){
+        log("Could not open file for reading.");
+        return HTTP_STATUS_NOT_FOUND;
+    }
 
     /* Determine mimetype */
+    if(mimetype = determine_mimetype(r->path) == NULL){
+        log("Could not determine mimetype.");
+        return HTTP_STATUS_NOT_FOUND;
+    }
 
     /* Write HTTP Headers with OK status and determined Content-Type */
 

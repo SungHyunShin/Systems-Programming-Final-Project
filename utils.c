@@ -39,12 +39,38 @@ char * determine_mimetype(const char *path) {
     FILE *fs = NULL;
 
     /* Find file extension */
+    if((ext = strchr(path, '.') + 1) == NULL){
+        log("Cannot find file extension.");
+        return DefaultMimeType;
+    }
 
     /* Open MimeTypesPath file */
+    if(fs = fopen(MimeTypesPath, "r+") == NULL){
+        log("cannot open file extension");
+        return DefaultMimeType;
+    }
 
     /* Scan file for matching file extensions */
+    while(fgets(buffer, BUFSIZ, fs)){
+        token = strtok(buffer, "\t");
+        token = skip_whitespace(token);
 
-    return NULL;
+        while(streq(token, "\n") ==){
+            
+        }
+
+    }
+
+
+    if(mimetype == NULL){
+        log("No matching mimetype found.");
+        return DefaultMimeType;
+    }
+
+    // close fs
+    close(fs);
+
+    return mimetype;
 }
 
 /**
