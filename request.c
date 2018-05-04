@@ -150,9 +150,9 @@ int parse_request(Request *r) {
  **/
 int parse_request_method(Request *r) {
     char buffer[BUFSIZ];
-    char *method = malloc(BUFSIZ);
-    char *uri    = malloc(BUFSIZ);
-    char *query  = malloc(BUFSIZ);
+    char *method;
+    char *uri;
+    char *query;
     const char* delim = " ";
     const char* quest = "?";
     /* Read line from socket */
@@ -184,9 +184,9 @@ int parse_request_method(Request *r) {
     }
 
     /* Record method, uri, and query in request struct */
-    r->method = method;
-    r->uri    = uri;
-    r->query  = query; // may be an issue because it might not exist.
+    r->method = strdup(method);
+    r->uri    = strdup(uri);
+    r->query  = strdup(query); // may be an issue because it might not exist.
 
     debug("HTTP METHOD: %s", r->method);
     debug("HTTP URI:    %s", r->uri);
