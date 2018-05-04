@@ -166,17 +166,86 @@ fail:
 HTTPStatus handle_cgi_request(Request *r) {
     FILE *pfs;
     char buffer[BUFSIZ];
+    
+    setenv("QUERY_STRING",r->query,1);
+    setenv("DOCUMENT_ROOT",RootPath,1);
+    setenv("REQUEST_URI",r->uri,1);
+    setenv("REQUEST_METHOD",r->method,1);
+    setenv("REMOTE_ADDR",r->host,1);
+    setenv("REMOTE_PORT",r->Port,1);
+    setenv("SCRIPT_FILENAME",r->path,1);
+    setenv("SERVER_PORT",r->port,1);
 
     /* Export CGI environment variables from request structure:
      * http://en.wikipedia.org/wiki/Common_Gateway_Interface */
 
-    /* Export CGI environment variables from request headers */
+
+
+    /* Export CGI environment variables from request headers */ 
+
+    Header* curr = r->headers;
+    
+    while(curr)
+      {
+	if(streq(curr->name,"Host"))
+	  {
+	    setenv("HTTP_HOST",curr->value,1);
+	  }
+	else if(streq(curr->name,"User-Agent"))
+	  {
+	    setenv("HTTP_USER_AGENT",curr->value,1);
+
+	  }
+	else if(streq(curr->name,"Accept"))
+	  {
+	    setenv("HTTP_ACCEPT",curr->value,1);
+
+	  }
+	else if(streq(curr->nam,"Accept-Language"))
+	  {
+	    setenv("HTTP_ACCEPT_LANGUAGE",curr->value,1);
+	  }
+	else if(streq(curr->name,"Accept-Encoding"))
+	  {
+	    setenv("HTTP_ACCEPT_ENCODING",curr->value,1);
+	  }
+	else if(streq(curr->name,"Connection"))
+	  {
+	    setenv("HTTP_CONNECTION",curr->value,1);
+	  }
+
+	curr=curr->next;
+      }
+
+      
+
+
+
 
     /* POpen CGI Script */
 
+    if((pfs=popen(r->path,"r+"))==NULL)
+      {
+	log("unable to popen");
+	pclose(pfs);
+	return HTTP_STATUS_INTERNAL_SERVER_ERROR;
+      }
+
     /* Copy data from popen to socket */
 
+    while(fgets(buffer,BUFSIZ,pfs) !=NULL)
+      {
+	if( (fprintf(r->file,"%s/n",buffer))<0)
+	  {
+	    log("unable to fprintf");
+	  }
+
+      }
+
     /* Close popen, flush socket, return OK */
+    pclose(pfs);
+    fflush(r->flush);
+
     return HTTP_STATUS_OK;
 }
 
