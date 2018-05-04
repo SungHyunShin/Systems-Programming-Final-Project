@@ -135,8 +135,8 @@ HTTPStatus  handle_file_request(Request *r) {
     /* Read from file and write to socket in chunks */
     // TODO: do we add a <html> and </html> to these fwrites
     while((nread = fread(buffer, BUFSIZ, 1, fs)) > 0){ // 1 element of size BUFSIZ
-        if(fwrite(buffer, nread, 1, r->file) < 0){ // write to file, 1 element of size nread
-            log("Cannot write to socket");
+        if(fwrite(buffer, nread, 1, r->file) != nread){ // write to file, 1 element of size nread
+            log("Could not write to file");
             goto fail;
         }
     }
