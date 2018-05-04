@@ -16,14 +16,21 @@
 int single_server(int sfd) {
     /* Accept and handle HTTP request */
     while (true) {
+        struct request * r;
     	/* Accept request */
-
+        r = accept_request(sfd);
 	/* Handle request */
-
+        if(handle_request(r) != HTTP_STATUS_OK){
+            log("Unable to handle request.");
+            free_request(request);
+            return EXIT_FAILURE;
+        }
 	/* Free request */
+        free_request(request);
     }
 
     /* Close server socket */
+    close(sfd);
     return EXIT_SUCCESS;
 }
 
