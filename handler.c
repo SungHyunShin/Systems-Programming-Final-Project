@@ -85,7 +85,7 @@ HTTPStatus  handle_browse_request(Request *r) {
     /* For each entry in directory, emit HTML list item */
     fprintf(r->file, "<ul>");
     for(int i = 0; it < n; it++){
-        fprint(r->file,"<li> </li>",
+        fprint(r->file,"<li><a></a></li>",
     }
     fprintf(r->file, "<ul>");
 
