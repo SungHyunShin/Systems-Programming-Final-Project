@@ -70,22 +70,26 @@ HTTPStatus  handle_browse_request(Request *r) {
     if(!directory){
         log("Could not open directory: %s",r->path);
     }
+
     n = scandir( r->path, &entries, NULL, alphasort);
-    if(n<0){
-        log("Unable to scandir on directory: %s", r->path);
+
+    if(n == -1){
+        log("Unable to scandir on directory.");
         closedir(directory);
         return HTTP_STATUS_NOT_FOUND;
     }
     
     /* Write HTTP Header with OK Status and text/html Content-Type */
-    fprintf(r->file, "HTTP/1.0 200 OK\n");
-    fprintf(r->file, "Content-Type: text/html\n");
-    fprintf(r->file, "\r\n");
+    fprintf(r->file, "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n");
     
     /* For each entry in directory, emit HTML list item */
     fprintf(r->file, "<ul>");
-    for(int i = 0; it < n; it++){
-        fprint(r->file,"<li><a></a></li>",
+    for(int i = 0; i < n; i++){
+        fprintf(r->file,"<li>"); // list item
+        fprintf(r->file, "<a href=%s%s>", r->uri, entries[i]->d_name); // link url
+        fprintf(r->file, entries[i]->d_name); // link name
+        fprintf(r->file, "</a>"); // closing link
+        fprintf(r->file, "</li>"); // closing list item
     }
     fprintf(r->file, "<ul>");
 
