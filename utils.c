@@ -42,7 +42,7 @@ char * determine_mimetype(const char *path) {
     // takes you to one char after the '.'
     if((ext = strchr(path, '.') + 1) == NULL){
         log("Cannot find file extension.");
-        return DefaultMimeType;
+        return DefaultMimeType; // TODO: can we do this or do we need to malloc first?
     }
 
     /* Open MimeTypesPath file */
@@ -71,8 +71,7 @@ char * determine_mimetype(const char *path) {
 
     if(mimetype == NULL){
         log("No matching mimetype found.");
-        close(fs);
-        return DefaultMimeType;
+        mimetype = strdup(DefaultMimeType);
     }
 
     // close fs

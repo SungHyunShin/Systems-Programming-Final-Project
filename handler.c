@@ -99,14 +99,16 @@ HTTPStatus  handle_file_request(Request *r) {
     }
 
     /* Determine mimetype */
-    if(mimetype = determine_mimetype(r->path) == NULL){
-        log("Could not determine mimetype.");
+    mimetype = determine_mimetype(r->path);
+
+    /* Write HTTP Headers with OK status and determined Content-Type */
+    if(fprintf(r->file, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", mimetype) < 0){
+        log("Cannot print to socket.");
         return HTTP_STATUS_NOT_FOUND;
     }
 
-    /* Write HTTP Headers with OK status and determined Content-Type */
-
     /* Read from file and write to socket in chunks */
+    
 
     /* Close file, flush socket, deallocate mimetype, return OK */
     return HTTP_STATUS_OK;
