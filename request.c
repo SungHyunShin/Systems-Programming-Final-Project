@@ -150,9 +150,9 @@ int parse_request(Request *r) {
  **/
 int parse_request_method(Request *r) {
     char buffer[BUFSIZ];
-    char *method;
-    char *uri;
-    char *query;
+    char *method = malloc(BUFSIZ);
+    char *uri    = malloc(BUFSIZ);
+    char *query  = malloc(BUFSIZ);
     const char* delim = " ";
     const char* quest = "?";
     /* Read line from socket */
