@@ -45,6 +45,26 @@ HTTPStatus  handle_request(Request *r) {
     debug("HTTP REQUEST PATH: %s", r->path);
 
     /* Dispatch to appropriate request handler type based on file type */
+    struct stat fileStat;
+    if(stat(r->path, &fileStat) == -1){
+      log("Could not get fileStat.");
+      return handle_error(r, HTTP_STATUS_INTERNAL_SERVER_ERROR);
+    }
+
+    if(S_ISDIR(fileStat.st_mode)){
+      result = handle_browse_request(r);
+    }
+    if(S_ISREG(fileStat.st_mode)){
+      if(access(r->path, R_OK)){
+        result = handle_file_request(r);
+      }else if(access(r->path, X_OK)){
+        result = handle_cgi_request(r);
+      }
+    }
+
+    if(result != HTTP_STATUS_OK){
+      handle_error(r, result);
+    }
 
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
     return result;
@@ -87,7 +107,7 @@ HTTPStatus  handle_browse_request(Request *r) {
     for(int i = 0; i < n; i++){
         fprintf(r->file,"<li>"); // list item
         fprintf(r->file, "<a href=%s%s>", r->uri, entries[i]->d_name); // link url
-        fprintf(r->file, entries[i]->d_name); // link name
+        fprintf(r->file, "%s", entries[i]->d_name); // link name
         fprintf(r->file, "</a>"); // closing link
         fprintf(r->file, "</li>"); // closing list item
     }
@@ -175,7 +195,7 @@ HTTPStatus handle_cgi_request(Request *r) {
     setenv("REQUEST_URI",r->uri,1);
     setenv("REQUEST_METHOD",r->method,1);
     setenv("REMOTE_ADDR",r->host,1);
-    setenv("REMOTE_PORT",r->Port,1);
+    setenv("REMOTE_PORT",r->port,1);
     setenv("SCRIPT_FILENAME",r->path,1);
     setenv("SERVER_PORT",r->port,1);
 
@@ -184,7 +204,7 @@ HTTPStatus handle_cgi_request(Request *r) {
 
 
 
-    /* Export CGI environment variables from request headers */ 
+    /* Export CGI environment variables from request headers */
 
     Header* curr = r->headers;
     
@@ -204,7 +224,7 @@ HTTPStatus handle_cgi_request(Request *r) {
 	    setenv("HTTP_ACCEPT",curr->value,1);
 
 	  }
-	else if(streq(curr->nam,"Accept-Language"))
+	else if(streq(curr->name,"Accept-Language"))
 	  {
 	    setenv("HTTP_ACCEPT_LANGUAGE",curr->value,1);
 	  }
@@ -247,7 +267,7 @@ HTTPStatus handle_cgi_request(Request *r) {
 
     /* Close popen, flush socket, return OK */
     pclose(pfs);
-    fflush(r->flush);
+    fflush(r->file);
 
     return HTTP_STATUS_OK;
 }
