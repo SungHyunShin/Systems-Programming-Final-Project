@@ -44,6 +44,44 @@ void usage(const char *progname, int status) {
  * if specified.
  */
 bool parse_options(int argc, char *argv[], ServerMode *mode) {
+    int argind = 1;
+    
+    char *PROGRAM_NAME = argv[0];
+    
+    char *format = NULL;
+    while(argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-'){
+        char *arg = argv[argind++];
+        switch(arg[1]){
+            case 'h':
+                usage(PROGRAM_NAME, 0);
+                break;
+            case 'c':
+                if(strcmp(argv[argind++], "forking") == 0){
+                    mode = FORKING; 
+                }else if(strcmp(argv[argind++], "single") == 0){
+                    mode = SINGLE;
+                }else{
+                    mode = UNKNOWN;
+                }
+                break;
+            case 'm':
+                MimeTypesPath = argv[argind++];
+                break;
+            case 'M':
+                DefaultMimeType = argv[argind++];
+                break;
+            case 'p':
+                Port = argv[argind++];
+                break;
+            case 'r':
+                RootPath = argv[argind++];
+                break;
+            default:
+                usage(PROGRAM_NAME, 1);
+                break;
+        }
+    }
+
     return true;
 }
 
