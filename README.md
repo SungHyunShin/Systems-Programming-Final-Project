@@ -18,7 +18,7 @@ Errata
 
 Summary of things that don't work (quite right).
 
-We are aware that we fail one test to correctly mime-type .html. We fail to this because we think some default mime-type is being incorrectly put in, but we could not locate the source of this problem. We also have a problem in forking with valgrind leaks, but the forking valgrind test does pass all of the test_spidey.sh tests. When using working, we also found that the server does not auto close itself once the tests are over, and we think that stems from either a while(true) loop or from previous valgrind erros.
+We are aware that we fail one test to correctly mime-type .html. We fail to this because we think some default mime-type is being incorrectly put in, but we could not locate the source of this problem. We also have a problem in forking with valgrind leaks, but the forking valgrind test does pass all of the test_spidey.sh tests. When using forking, we also found that the server does not auto close itself once the tests are over, and we think that stems from either a while(true) loop or from previous valgrind erros.
 
 Contributions
 -------------
