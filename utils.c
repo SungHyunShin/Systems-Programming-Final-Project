@@ -32,52 +32,50 @@
  * This function returns an allocated string that must be free'd.
  **/
 char * determine_mimetype(const char *path) {
-    char *ext=NULL;
-    char *mimetype=NULL;
-    char *token=NULL;
-    char buffer[BUFSIZ]=NULL;
-    FILE *fs = NULL;
-
-    /* Find file extension */
-    // takes you to one char after the '.'
-    if((ext = strchr(path, '.') + 1) == NULL){
-        log("Cannot find file extension.");
-        return DefaultMimeType; // TODO: can we do this or do we need to malloc first?
-    }
-
-    /* Open MimeTypesPath file */
-    if(fs = fopen(MimeTypesPath, "r+") == NULL){
-        log("cannot open file extension");
-        return DefaultMimeType;
-    }
-
-    /* Scan file for matching file extensions */
-    bool exit = false;
-    while(fgets(buffer, BUFSIZ, fs) && !exit){
-        token = strtok(buffer, "\t");
-        *token = '\0';
-        token++; // get past the \0, now buffer is just the mimetype
-        token = skip_whitespace(token);
-
-        while(!streq(token, "\n") == 0){
-            if(strncmp(token, ext, strlen(ext))){
-                mimetype = strdup(buffer);
-                exit = true;
-                break;
-            }
-        }
-
-    }
-
-    if(mimetype == NULL){
-        log("No matching mimetype found.");
-        mimetype = strdup(DefaultMimeType);
-    }
-
-    // close fs
-    close(fs);
-
+  char *ext;
+  char *mimetype = strdup(DefaultMimeType);
+  char *token;
+  char buffer[BUFSIZ];
+  FILE *fs = NULL;
+  
+  /* Find file extension */
+  // takes you to one char after the '.'
+  if((ext = strchr(path, '.')) == NULL){
+    log("Cannot find file extension.");
     return mimetype;
+  }
+  ext++;
+  /* Open MimeTypesPath file */
+  if((fs = fopen(MimeTypesPath, "r")) == NULL){
+    log("cannot open file extension");
+    return mimetype;
+  }
+  
+  /* Scan file for matching file extensions */
+  bool exit = false;
+  while(fgets(buffer, BUFSIZ, fs) && !exit){
+    token = strtok(buffer, "\t");
+    token++; // get past the \0, now buffer is just the mimetype
+    token = skip_whitespace(token);
+    
+    while(!streq(token, "\n") == 0){
+      if(strncmp(token, ext, strlen(ext))){
+	mimetype = strdup(buffer);
+	exit = true;
+	break;
+      }
+    }
+    
+  }
+
+  if(mimetype == NULL){
+    log("No matching mimetype found.");
+  }
+  
+  // close fs
+  fclose(fs);
+  
+  return mimetype;
 }
 
 /**
@@ -98,29 +96,20 @@ char * determine_mimetype(const char *path) {
  **/
 char * determine_request_path(const char *uri) {
   
-  char * temp = strdup(RootPath);
-  strcat(temp,uri);
-
-
-  char * rlpath = realpath(temp,NULL);
-
- 
-    if(rlpath == NULL){
-        log("Cannot determine request path.");
-        free(temp);
-	free(rlpath);
-        return NULL;
-    }
-
-    if(strncmp(rlpath, RootPath, strlen(RootPath)) != 0){
-        log("Real path does not begin with RootPath.");
-        free(temp);
-	free(rlpath);
-        return NULL;
-    }
-
-    free(temp);
-    return rlpath;
+  char buffer[BUFSIZ];
+  char *rlpath = buffer;
+  sprintf(rlpath, "%s%s", RootPath, uri);
+  
+  if ((rlpath = realpath(rlpath, NULL)) == NULL){
+    return NULL;
+  }
+  *(rlpath + strlen(rlpath)) = '\0';
+  
+  if (strncmp(rlpath, RootPath, strlen(RootPath)) != 0){
+    return NULL;
+  }
+  
+  return rlpath;
 }
 
 /**
@@ -132,15 +121,15 @@ char * determine_request_path(const char *uri) {
  * http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
  **/
 const char * http_status_string(HTTPStatus status) {
-    static char *StatusStrings[] = {
-        "200 OK",
-        "400 Bad Request",
-        "404 Not Found",
-        "500 Internal Server Error",
-        "418 I'm A Teapot",
-    };
-
-    return StatusStrings[status];
+  static char *StatusStrings[] = {
+    "200 OK",
+    "400 Bad Request",
+    "404 Not Found",
+    "500 Internal Server Error",
+    "418 I'm A Teapot",
+  };
+  
+  return StatusStrings[status];
 }
 
 /**
@@ -150,10 +139,10 @@ const char * http_status_string(HTTPStatus status) {
  * @return  Point to first whitespace character in s.
  **/
 char * skip_nonwhitespace(char *s) {
-    while(!isspace(*s)){
-        s++;
-    }
-    return s;
+  while(!isspace(*s)){
+    s++;
+  }
+  return s;
 }
 
 /**
@@ -163,10 +152,10 @@ char * skip_nonwhitespace(char *s) {
  * @return  Point to first non-whitespace character in s.
  **/
 char * skip_whitespace(char *s) {
-    while(isspace(*s)){
-        s++;
-    }
-    return s;
+  while(isspace(*s)){
+    s++;
+  }
+  return s;
 }
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */

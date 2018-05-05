@@ -72,6 +72,6 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(PROCESSES)
     timeIterable = pool.map(do_request, range(PROCESSES))
 
-    print("TOTAL AVERAGE ELAPSED TIME: {:.2f}".format(sum(timeIterable) / PROCESSES))
+    print("TOTAL AVERAGE ELAPSED TIME: {:.6f}".format(sum(timeIterable) / PROCESSES))
 
 # vim: set sts=4 sw=4 ts=8 expandtab ft=python:

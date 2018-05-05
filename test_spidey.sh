@@ -88,7 +88,7 @@ echo
 cowsay -W 72 <<EOF
 On another machine, please run:
 
-    valgrind --leak-check-full ./spidey -r ~pbui/pub/www -p PORT -c MODE
+    valgrind --leak-check=full ./spidey -r ~pbui/pub/www -p PORT -c MODE
 
 - Where PORT is a number between 9000 - 9999
 
@@ -114,7 +114,7 @@ echo "Testing spidey server on $HOST:$PORT ..."
 printf "\n %-64s ... \n" "Handle Browse Requests"
 
 printf "     %-60s ... " "/"
-HREFS="/..,/html,/scripts,/text"
+HREFS="/..,/html,/scripts,/song.txt,/text"
 STATUS="HTTP/1.0 200 OK"
 CONTENT="text/html"
 curl -s -D $WORKSPACE/header $HOST:$PORT/ > $WORKSPACE/test
@@ -197,6 +197,17 @@ fi
 
 sleep 2
 
+printf "     %-60s ... " "/song.txt"
+MD5SUM=e2c99a8ac0448f1731084b29fc64462d
+curl -s -D $WORKSPACE/header $HOST:$PORT/song.txt > $WORKSPACE/test
+if ! check_status $? 0 || ! grep_all "you forget her" $WORKSPACE/test || ! check_md5sum $MD5SUM || ! check_header "$STATUS" "$CONTENT"; then
+    error "Failure"
+else
+    echo "Success"
+fi
+
+sleep 2
+
 # ------------------------------------------------------------------------------
 
 printf "\n %-64s ... \n" "Handle CGI Requests"
@@ -263,10 +274,24 @@ else
     echo "Success"
 fi
 
+sleep 2
+
 printf "     %-60s ... " "Bad Request"
 STATUS="HTTP/1.0 400 Bad Request"
 CONTENT="text/html"
 nc $HOST $PORT <<<"DERP" |& tee $WORKSPACE/test $WORKSPACE/header > /dev/null
+if ! check_status $? 0 || ! grep_all "400" $WORKSPACE/test || ! check_header "$STATUS" "$CONTENT"; then
+    error "Failure"
+else
+    echo "Success"
+fi
+
+sleep 2
+
+printf "     %-60s ... " "Bad Headers"
+STATUS="HTTP/1.0 400 Bad Request"
+CONTENT="text/html"
+printf "GET / HTTP/1.0\r\nHost\r\n" | nc $HOST $PORT |& tee $WORKSPACE/test $WORKSPACE/header > /dev/null
 if ! check_status $? 0 || ! grep_all "400" $WORKSPACE/test || ! check_header "$STATUS" "$CONTENT"; then
     error "Failure"
 else
