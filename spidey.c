@@ -44,16 +44,12 @@ void usage(const char *progname, int status) {
  * if specified.
  */
 bool parse_options(int argc, char *argv[], ServerMode *mode) {
-    int argind = 1;
-    
-    char *PROGRAM_NAME = argv[0];
-    
-    char *format = NULL;
+    int argind = 1;    
     while(argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-'){
         char *arg = argv[argind++];
         switch(arg[1]){
             case 'h':
-                usage(PROGRAM_NAME, 0);
+                usage(argv[0], 0);
                 break;
             case 'c':
                 if(strcmp(argv[argind++], "forking") == 0){
@@ -89,10 +85,15 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
  **/
 int main(int argc, char *argv[]) {
     ServerMode mode;
+    char *PROGRAM_NAME = argv[0];
 
     /* Parse command line options */
+    if(!parse_options){
+        usage(PROGRAM_NAME, 1);
+    }
 
     /* Listen to server socket */
+    
 
     /* Determine real RootPath */
 
