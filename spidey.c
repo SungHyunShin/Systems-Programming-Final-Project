@@ -93,9 +93,10 @@ int main(int argc, char *argv[]) {
     }
 
     /* Listen to server socket */
-    
+    int server_fd = socket_listen(Port);
 
     /* Determine real RootPath */
+    RootPath = realpath(RootPath, NULL);
 
     log("Listening on port %s", Port);
     debug("RootPath        = %s", RootPath);
@@ -104,6 +105,14 @@ int main(int argc, char *argv[]) {
     debug("ConcurrencyMode = %s", mode == SINGLE ? "Single" : "Forking");
 
     /* Start either forking or single HTTP server */
+    if(mode == SINGLE){
+        single_server(server_fd);
+    }else if(mode == FORKING){
+        forking_server(server_fd);
+    }else if(mode == UNKNOWN){
+        usage(PROGRAM_NAME, 1);
+    }
+    free(RootPath);
     return EXIT_SUCCESS;
 }
 
