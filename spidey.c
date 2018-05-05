@@ -77,8 +77,7 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
                 RootPath = argv[argind++];
                 break;
             default:
-                usage(PROGRAM_NAME, 1);
-                break;
+                return false;
         }
     }
 
