@@ -32,10 +32,10 @@
  * This function returns an allocated string that must be free'd.
  **/
 char * determine_mimetype(const char *path) {
-    char *ext=NULL;
-    char *mimetype=NULL;
-    char *token=NULL;
-    char buffer[BUFSIZ]=NULL;
+    char *ext;
+    char *mimetype;
+    char *token;
+    char buffer[BUFSIZ];
     FILE *fs = NULL;
 
     /* Find file extension */
@@ -46,7 +46,7 @@ char * determine_mimetype(const char *path) {
     }
 
     /* Open MimeTypesPath file */
-    if(fs = fopen(MimeTypesPath, "r+") == NULL){
+    if((fs = fopen(MimeTypesPath, "r+")) == NULL){
         log("cannot open file extension");
         return DefaultMimeType;
     }
@@ -75,7 +75,7 @@ char * determine_mimetype(const char *path) {
     }
 
     // close fs
-    close(fs);
+    fclose(fs);
 
     return mimetype;
 }

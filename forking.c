@@ -22,10 +22,10 @@ int forking_server(int sfd) {
     while (true) {
         /* Accept request */
         debug("Accepting client request.");
-        FILE *client_file = accept_request(sfd);
-        if(!client_file){
-            continue;
-        }
+        //FILE *client_file = accept_request(sfd);
+        //if(!client_file){
+        //    continue;
+        //}
 
         /* Ignore children */
         

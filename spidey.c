@@ -53,11 +53,11 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
                 break;
             case 'c':
                 if(strcmp(argv[argind++], "forking") == 0){
-                    mode = FORKING; 
+                    *mode = FORKING; 
                 }else if(strcmp(argv[argind++], "single") == 0){
-                    mode = SINGLE;
+                    *mode = SINGLE;
                 }else{
-                    mode = UNKNOWN;
+                    *mode = UNKNOWN;
                 }
                 break;
             case 'm':
@@ -76,7 +76,7 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
                 return false;
         }
     }
-
+    
     return true;
 }
 
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
     char *PROGRAM_NAME = argv[0];
 
     /* Parse command line options */
-    if(!parse_options){
+    if(!parse_options(argc, argv, &mode)){
         usage(PROGRAM_NAME, 1);
     }
 
