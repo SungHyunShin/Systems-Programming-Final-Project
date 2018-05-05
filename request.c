@@ -33,6 +33,7 @@ Request * accept_request(int sfd) {
     socklen_t rlen;
 
     /* Allocate request struct (zeroed) */
+    rlen = sizeof(struct sockaddr);
     r = calloc(1, sizeof(Request));
     r->headers = NULL;
 
@@ -83,7 +84,11 @@ void free_request(Request *r) {
     }
 
     /* Close socket or fd */
-    close(r->fd);
+    if(r->file){
+        fclose(r->file);
+    }else if(r->fd >= 0){
+        close(r->fd);
+    }
 
     /* Free allocated strings */
     // TODO: THIS MAY BE WRONG
@@ -94,12 +99,13 @@ void free_request(Request *r) {
 
     /* Free headers */
     Header *curr = r->headers, *tmp;
-    while(curr->next != NULL){
+    while(curr){
         tmp = curr;
         curr = curr->next;
+        free(tmp->name);
+        free(tmp->value);
         free(tmp);
     }
-    free(curr);
 
     /* Free request */
     free(r);
@@ -153,10 +159,10 @@ int parse_request_method(Request *r) {
     char *method;
     char *uri;
     char *query;
-    const char* delim = " ";
+    const char* delim = " \t\n";
     const char* quest = "?";
     /* Read line from socket */
-    if(read(r->fd, buffer, 0) < 0){
+    if(fgets(buffer, BUFSIZ, r->file) == NULL){
         log("Could not read from socket.");
         goto fail;
     }
@@ -175,13 +181,13 @@ int parse_request_method(Request *r) {
 
     /* Parse query from uri */
     // skip uri, go straight to query
-    if((strtok(uri, quest)) == NULL){
+    if((query = strtok(uri, quest) + 1) == NULL){
         debug("No Query Exists.");
         query = NULL;
-    }else if((query = strtok(NULL, quest)) == NULL){
+    }/*else if((query = strtok(NULL, quest)) == NULL){
         log("Could not parse query.");
         goto fail;
-    }
+    }*/
 
     /* Record method, uri, and query in request struct */
     r->method = strdup(method);
@@ -234,16 +240,16 @@ int parse_request_headers(Request *r) {
     char *temp; // temporary char to split the buffer
 
     /* Parse headers from socket */
-    r->headers = curr;
+    curr = r->headers;
     while(fgets(buffer, BUFSIZ, r->file)){
       if((strcmp(buffer, "\n")) == 0){
-	log("Reached end of headers.");
-	break;
+        log("Reached end of headers.");
+        break;
       }
       chomp(buffer);
       if((temp = strchr(buffer, ':')) == NULL){
-	log("Not a valid header format.");
-	goto fail;
+        log("Not a valid header format. %s",buffer);
+        goto fail;
       }
       // split buffer at the position of the colon
       *temp = '\0';
@@ -251,8 +257,9 @@ int parse_request_headers(Request *r) {
       temp = skip_whitespace(temp + 1); // goes to space after colon
       value = temp;
       if((curr = calloc(1, sizeof(Header))) == NULL){
-	log("Could not allocate memory for header.");
-	goto fail;
+        log("Could not allocate memory for header.");
+        free(curr);
+        goto fail;
       }
       // set headers in the request struct
       curr->name = name; curr->value = value;
@@ -266,7 +273,6 @@ int parse_request_headers(Request *r) {
       debug("HTTP HEADER %s = %s", header->name, header->value);
     }
 #endif
-    
     return 0;
     
  fail:
