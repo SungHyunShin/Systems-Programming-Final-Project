@@ -80,31 +80,24 @@ fail:
  **/
 void free_request(Request *r) {
     if (!r) {
-    	return;
+        // requests is null
+        return;
     }
 
     /* Close socket or fd */
-    if(r->file){
-        fclose(r->file);
-    }else if(r->fd >= 0){
-        close(r->fd);
-    }
+    fclose(r->file);
+    close(r->fd);
 
     /* Free allocated strings */
-    // TODO: THIS MAY BE WRONG
     free(r->method);
     free(r->uri);
     free(r->path);
     free(r->query);
 
     /* Free headers */
-    Header *curr = r->headers, *tmp;
-    while(curr){
-        tmp = curr;
-        curr = curr->next;
-        free(tmp->name);
-        free(tmp->value);
-        free(tmp);
+    if(r->headers){
+        free(r->headers->next);
+        free(r->headers);
     }
 
     /* Free request */
@@ -124,7 +117,7 @@ void free_request(Request *r) {
 int parse_request(Request *r) {
     /* Parse HTTP Request Method */
     if(parse_request_method(r) < 0){
-        log("Could not parse request headers method.");
+        log( "Could not parse request headers method.");
         return -1;
     }
 
@@ -160,9 +153,8 @@ int parse_request_method(Request *r) {
     char *uri;
     char *query;
     const char* delim = " \t\n";
-    const char* quest = "?";
     /* Read line from socket */
-    if(fgets(buffer, BUFSIZ, r->file) == NULL){
+    if(fgets(buffer,BUFSIZ,r->file) == NULL){
         log("Could not read from socket.");
         goto fail;
     }
@@ -180,19 +172,19 @@ int parse_request_method(Request *r) {
     }
 
     /* Parse query from uri */
-    // skip uri, go straight to query
-    if((query = strtok(uri, quest) + 1) == NULL){
-        debug("No Query Exists.");
-        query = NULL;
-    }/*else if((query = strtok(NULL, quest)) == NULL){
-        log("Could not parse query.");
-        goto fail;
-    }*/
+    char *temp  = strchr(uri, '?');
+    if (temp != NULL){
+        temp++;
+        int difference = strlen(uri) - strlen(temp);
+        *(uri + difference - 1) = '\0';
+    }
+    query = temp;
 
     /* Record method, uri, and query in request struct */
     r->method = strdup(method);
     r->uri    = strdup(uri);
-    r->query  = strdup(query); // may be an issue because it might not exist.
+    if(query != NULL)
+        r->query  = strdup(query); // may be an issue because it might not exist.
 
     debug("HTTP METHOD: %s", r->method);
     debug("HTTP URI:    %s", r->uri);
@@ -237,35 +229,41 @@ int parse_request_headers(Request *r) {
     char *name;
     char *value;
 
+    /* Parse headers from socket */
     char *temp; // temporary char to split the buffer
 
     /* Parse headers from socket */
-    curr = r->headers;
+    r->headers = curr;
+    
     while(fgets(buffer, BUFSIZ, r->file)){
-      if((strcmp(buffer, "\n")) == 0){
+      if((strcmp(buffer, "\n")) == 0 || (strcmp(buffer, "\r\n")) == 0){
         log("Reached end of headers.");
         break;
       }
       chomp(buffer);
       if((temp = strchr(buffer, ':')) == NULL){
-        log("Not a valid header format. %s",buffer);
+        log("Not a valid header format.");
         goto fail;
       }
       // split buffer at the position of the colon
       *temp = '\0';
       name = buffer; // get just the name
-      temp = skip_whitespace(temp + 1); // goes to space after colon
-      value = temp;
-      if((curr = calloc(1, sizeof(Header))) == NULL){
+      value = skip_whitespace(temp + 1); // goes to space after colon
+      
+      //value = temp;
+      if((curr = calloc(1, sizeof(struct header))) == NULL){
         log("Could not allocate memory for header.");
-        free(curr);
         goto fail;
       }
       // set headers in the request struct
-      curr->name = name; curr->value = value;
-      curr->next = NULL;
+      curr->name = strdup(name); 
+      curr->value = strdup(value);
+      
+
+      curr->next = r->headers;
+
       // move to the next header
-      curr = curr->next;
+      r->headers = curr;
     }
     
 #ifndef NDEBUG
@@ -278,5 +276,4 @@ int parse_request_headers(Request *r) {
  fail:
     return -1;
 }
-
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */

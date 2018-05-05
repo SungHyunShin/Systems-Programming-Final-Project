@@ -22,18 +22,33 @@ int forking_server(int sfd) {
     while (true) {
         /* Accept request */
         debug("Accepting client request.");
-        //FILE *client_file = accept_request(sfd);
-        //if(!client_file){
-        //    continue;
-        //}
-
-        /* Ignore children */
+        Request *r = accept_request(sfd);
+        if(!r){
+            continue;
+        }
         
-
+        /* Ignore children */
+        signal(SIGINT, SIG_IGN);
+        
         /* Fork off child process to handle request */
+        pid_t rc = fork();
+        if(rc == 0){
+            // child
+            close(sfd);
+            exit(handle_request(r) != 0);
+        }else if(rc > 0){
+            // parent
+            free_request(r);
+            continue;
+        }else if(rc < 0){
+            // error
+            free_request(r);
+            continue;
+        }
     }
 
     /* Close server socket */
+    close(sfd);
     return EXIT_SUCCESS;
 }
 
