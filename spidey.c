@@ -52,13 +52,14 @@ bool parse_options(int argc, char *argv[], ServerMode *mode) {
                 usage(argv[0], 0);
                 break;
             case 'c':
-                if(strcmp(argv[argind++], "forking") == 0){
+                if(strcmp(argv[argind], "forking") == 0){
                     *mode = FORKING; 
-                }else if(strcmp(argv[argind++], "single") == 0){
+                }else if(strcmp(argv[argind], "single") == 0){
                     *mode = SINGLE;
                 }else{
                     *mode = UNKNOWN;
                 }
+                argind++;
                 break;
             case 'm':
                 MimeTypesPath = argv[argind++];
